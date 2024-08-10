@@ -1,19 +1,18 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
 import NavBar from "./components/NavBar";
 import CustomerList from "./components/CustomerList";
-import DisplayCustomer from "./components/DisplayCustomer";
+import { useState } from "react";
+import CustomerDetail from "./components/DisplayCustomer";
+import { CustomerType } from "./components/Customer";
 
 function App() {
-    const [count, setCount] = useState(0);
+    const [selected, setSelected] = useState<CustomerType | null>(null);
 
     return (
-        <div className="min-h-screen flex flex-col">
+        <div className="h-screen flex flex-col">
             <NavBar />
-            <div className="flex-1 flex">
-                <CustomerList />
-                <DisplayCustomer />
+            <div className="flex-1 flex overflow-hidden">
+                <CustomerList selected={selected} setSelected={setSelected} />
+                {selected && <CustomerDetail {...selected} />}
             </div>
         </div>
     );
