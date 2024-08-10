@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef } from "react";
 import Customer, { CustomerType } from "./Customer";
+import { useCustomers } from "../hooks/usecustomers";
 
 export default function CustomerList({
     selected,
@@ -8,11 +9,7 @@ export default function CustomerList({
     selected: CustomerType | null;
     setSelected: React.Dispatch<React.SetStateAction<CustomerType | null>>;
 }) {
-    const [customers, setCustomers] = useState<CustomerType[]>([]);
-    const [loading, setLoading] = useState<boolean>(true);
-    const [hasMore, setHasMore] = useState<boolean>(true);
-    const [page, setPage] = useState<number>(1);
-    const limit = 20;
+    const { customers, loading, hasMore, setPage, error } = useCustomers();
 
     const observer = useRef<IntersectionObserver | null>(null);
     const lastElementRef = useCallback(
@@ -30,56 +27,43 @@ export default function CustomerList({
                 observer.current?.observe(node);
             }
         },
-        [hasMore, loading]
+        [hasMore, loading, setPage]
     );
 
-    const fetchUser = useCallback(async () => {
-        try {
-            setLoading(true);
-            const res = await fetch(
-                `https://dummyjson.com/users?limit=${limit}&skip=${
-                    limit * (page - 1)
-                }`
-            );
-
-            const data = await res.json();
-            if (data.users.length === 0) {
-                setHasMore(false);
-            }
-            setCustomers((prev) => [...prev, ...data.users]);
-        } catch (error) {
-            console.log("error occured = ", error);
-        } finally {
-            setLoading(false);
-        }
-    }, [limit, page]);
-
-    useEffect(() => {
-        fetchUser();
-    }, [fetchUser]);
-
     return (
-        <div className="w-[300px] overflow-y-auto">
-            {customers.map((customer, index) => {
-                return index === customers.length - 1 ? (
-                    <div ref={lastElementRef}>
+        <>
+            <div className="absolute bg-black text-zinc-200 px-2 py-1 text-sm rounded-sm">
+                Total: {customers.length}
+            </div>
+            <div className="w-[300px] overflow-y-auto">
+                {customers.map((customer, index) => {
+                    return index === customers.length - 1 ? (
+                        <div ref={lastElementRef}>
+                            <Customer
+                                customer={customer}
+                                selected={selected}
+                                setSelected={setSelected}
+                            />
+                        </div>
+                    ) : (
                         <Customer
                             customer={customer}
                             selected={selected}
                             setSelected={setSelected}
                         />
-                    </div>
-                ) : (
-                    <Customer
-                        customer={customer}
-                        selected={selected}
-                        setSelected={setSelected}
-                    />
-                );
-            })}
-            {loading && (
-                <p className="mt-2 text-xl font-semibold">Loading ....</p>
-            )}
-        </div>
+                    );
+                })}
+                {loading && (
+                    <p className="mt-2 py-6 text-xl font-semibold">
+                        Loading ....
+                    </p>
+                )}
+                {error && (
+                    <p className="mt-2 py-6 text-red-500 text-sm font-semibold">
+                        {error}
+                    </p>
+                )}
+            </div>
+        </>
     );
 }
