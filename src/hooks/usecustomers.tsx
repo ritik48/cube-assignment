@@ -7,7 +7,7 @@ export function useCustomers() {
     const [hasMore, setHasMore] = useState<boolean>(true);
     const [error, setError] = useState<string>("");
     const [page, setPage] = useState<number>(1);
-    const limit = 20;
+    const limit = 10;
 
     const fetchUser = useCallback(async () => {
         try {
