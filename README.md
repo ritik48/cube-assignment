@@ -1,4 +1,4 @@
-### Cube Assignment
+### Cube Assignment [Live](https://cube-assignment-opal.vercel.app/)
 
 ---
 
